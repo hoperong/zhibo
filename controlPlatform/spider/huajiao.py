@@ -3,47 +3,89 @@
 
 from urllib import request
 from bs4 import BeautifulSoup
-import ssl
 import json
-
-categoryList = []
-url = r'http://www.huajiao.com'
-interfaceUrl = r'http://webh.huajiao.com/live/listcategory?offset=0&fmt=jsonp'
-sumNumber = 0
+from model import spider, model
+from controller import log
+from datetime import datetime
 
 
-def getCategoryList():
-    response = request.urlopen('{0}/category/{1}'.format(url, 1000))
-    html = BeautifulSoup(response.read().decode('utf-8'), 'html.parser')
-    result = html.select('.detail-items > dl > dd > a')
-    if len(result) > 2:
-        targetList = result[1:len(result) - 1]
-        for target in targetList:
-            attr = target['data-bk']
-            attrResult = attr.split('-')
-            if len(attrResult) > 1:
-                categoryList.append(attrResult[1])
-    return
+class huajiao(spider.spider):
 
+    url = r'http://www.huajiao.com'
+    interfaceUrl = r'http://webh.huajiao.com/live/listcategory?fmt=jsonp'
+    pageMount = 100
+    name = '花椒直播'
 
-if __name__ == '__main__':
-    ssl._create_default_https_context = ssl._create_unverified_context
-    getCategoryList()
-    print('开始计算，共{0}个分类'.format(len(categoryList)))
-    for i in range(len(categoryList)):
-        response = request.urlopen(
-            '{0}&cateid={1}&nums={2}'.format(interfaceUrl, categoryList[i], 0))
-        html = response.read().decode('utf-8')
-        huajiaoTv = json.loads(html)
-        total = huajiaoTv['data']['total']
-        response = request.urlopen(
-            '{0}&cateid={1}&nums={2}'.format(
-                interfaceUrl, categoryList[i], total))
-        huajiaoTv = json.loads(html)
-        feeds = huajiaoTv['data']['feeds']
-        for feed in feeds:
-            numberStr = feed['feed']['watches']
-            sumNumber += int(numberStr)
-        print('第{0}/{1}个分类，在线人数累计{2}人'.format(i +
-                                              1, len(categoryList), sumNumber))
-    print('计算结束，总共有{0}人'.format(sumNumber))
+    def getCategoryList(self):
+        categoryList = []
+        response = request.urlopen('{0}/category/{1}'.format(self.url, 1000))
+        html = BeautifulSoup(response.read().decode('utf-8'), 'html.parser')
+        result = html.select('.detail-items > dl > dd > a')
+        if len(result) > 2:
+            targetList = result[1:len(result) - 1]
+            for target in targetList:
+                attr = target['data-bk']
+                attrResult = attr.split('-')
+                if len(attrResult) > 1:
+                    categoryList.append(attrResult[1])
+        return categoryList
+
+    def run(self):
+        log.spiderLog('开始爬取...', self.className)
+        platform = model.Platform()
+        platform.name = self.name
+        platform.code = self.className
+        data = {'platform': platform, 'list': []}
+        categoryList = self.getCategoryList()
+        log.spiderLog('总共{0}个分类...'.format(len(categoryList)), self.className)
+        for i in range(len(categoryList)):
+            log.spiderLog('{0}/{1}个分类...'.format(i + 1,
+                                                 len(categoryList)),
+                          self.className)
+            j = 0
+            infoTime = datetime.now()
+            while 1 == 1:
+                response = request.urlopen(
+                    '{0}&offset={1}&cateid={2}&nums={3}'.format(
+                        self.interfaceUrl,
+                        j,
+                        categoryList[i],
+                        self.pageMount)
+                )
+                html = response.read().decode('utf-8')
+                huajiaoTv = json.loads(html)
+                if len(huajiaoTv['data']) <= 0:
+                    break
+                feeds = huajiaoTv['data']['feeds']
+                for feed in feeds:
+                    catalogName = feed['feed']['live_cate'] if feed['feed']['game'] == '' else feed['feed']['game']
+                    code = feed['feed']['feedid']
+                    name = feed['author']['nickname']
+                    roomUrl = '{0}/l/{1}'.format(self.url, code)
+                    title = feed['feed']['title']
+                    imageUrl = feed['feed']['feedid']
+                    number = int(feed['feed']['watches'])
+                    # catalog
+                    catalog = model.Catalog()
+                    catalog.name = catalogName
+                    # room
+                    room = model.Room()
+                    room.code = code
+                    room.name = name
+                    room.roomUrl = roomUrl
+                    room.title = title
+                    room.imageUrl = imageUrl
+                    # info
+                    info = model.Info()
+                    info.roomId = room.roomId
+                    info.catalogId = catalog.catalogId
+                    info.number = number
+                    info.time = infoTime
+                    data['list'].append({
+                        'catalog': catalog,
+                        'room': room,
+                        'info': info
+                    })
+                j += self.pageMount
+        log.spiderLog('爬取结束...', self.className)
+        return data

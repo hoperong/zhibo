@@ -100,5 +100,11 @@ ENV/
 # mypy
 .mypy_cache/
 
+# mac
 .DS_Store
+
+# controlPlatform
+controlPlatform/log/
+controlPlatform/config/init.py
+
 
