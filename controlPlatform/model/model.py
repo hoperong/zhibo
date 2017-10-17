@@ -2,7 +2,7 @@
 # coding=utf-8
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, BigInteger, String, DateTime, ForeignKey, text
+from sqlalchemy import Column, Integer, BigInteger, String, DateTime, ForeignKey, text, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
@@ -50,7 +50,6 @@ class Catalog(Base):
                        autoincrement=True)
     name = Column('name',
                   String(100),
-                  unique=True,
                   nullable=False,
                   default='',
                   server_default='')
@@ -71,6 +70,11 @@ class Catalog(Base):
     sort = relationship('Sort')
     infos = relationship('Info')
     rooms = relationship('Room')
+    # 组合索引
+    __table_args__ = (
+        UniqueConstraint('platformId', 'name',
+                         name='uix_platformId_name'),  # 联合唯一索引
+    )
 
 
 class Room(Base):
@@ -114,6 +118,11 @@ class Room(Base):
     platform = relationship('Platform')
     infos = relationship('Info')
     catalog = relationship('Catalog')
+    # 组合索引
+    __table_args__ = (
+        UniqueConstraint('platformId', 'code',
+                         name='uix_platformId_code'),  # 联合唯一索引
+    )
 
 
 class Platform(Base):
@@ -147,7 +156,6 @@ class Sort(Base):
                     autoincrement=True)
     name = Column('name',
                   String(100),
-                  unique=True,
                   nullable=False,
                   default='',
                   server_default='')

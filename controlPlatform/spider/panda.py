@@ -43,47 +43,51 @@ class panda(spider.spider):
         platform.name = self.name
         platform.code = self.className
         data = {'platform': platform, 'list': []}
-        ssl._create_default_https_context = ssl._create_unverified_context
-        endPage = self.getLastPageIndex()
-        log.spiderLog('总共{0}页...'.format(endPage), self.className)
-        for i in range(endPage):
-            log.spiderLog('{0}/{1}页...'.format(i + 1, endPage), self.className)
-            response = request.urlopen(
-                '{0}&pageno={1}&pagenum={2}'.format(self.url,
-                                                    i + 1,
-                                                    self.pageNum))
-            html = response.read().decode('utf-8')
-            pandaTv = json.loads(html)
-            items = pandaTv['data']['items']
-            infoTime = datetime.now()
-            for item in items:
-                catalogName = item['classification']['cname']
-                code = item['id']
-                name = item['userinfo']['nickName']
-                roomUrl = '{0}/{1}'.format(self.root, code)
-                title = item['name']
-                imageUrl = item['pictures']['img']
-                number = int(item['person_num'])
-                # catalog
-                catalog = model.Catalog()
-                catalog.name = catalogName
-                # room
-                room = model.Room()
-                room.code = code
-                room.name = name
-                room.roomUrl = roomUrl
-                room.title = title
-                room.imageUrl = imageUrl
-                # info
-                info = model.Info()
-                info.roomId = room.roomId
-                info.catalogId = catalog.catalogId
-                info.number = number
-                info.time = infoTime
-                data['list'].append({
-                    'catalog': catalog,
-                    'room': room,
-                    'info': info
-                })
-        log.spiderLog('爬取结束...', self.className)
+        try:
+            ssl._create_default_https_context = ssl._create_unverified_context
+            endPage = self.getLastPageIndex()
+            log.spiderLog('总共{0}页...'.format(endPage), self.className)
+            for i in range(endPage):
+                log.spiderLog('{0}/{1}页...'.format(i + 1,
+                                                   endPage), self.className)
+                response = request.urlopen(
+                    '{0}&pageno={1}&pagenum={2}'.format(self.url,
+                                                        i + 1,
+                                                        self.pageNum))
+                html = response.read().decode('utf-8')
+                pandaTv = json.loads(html)
+                items = pandaTv['data']['items']
+                infoTime = datetime.now()
+                for item in items:
+                    catalogName = item['classification']['cname']
+                    code = item['id']
+                    name = item['userinfo']['nickName']
+                    roomUrl = '{0}/{1}'.format(self.root, code)
+                    title = item['name']
+                    imageUrl = item['pictures']['img']
+                    number = int(item['person_num'])
+                    # catalog
+                    catalog = model.Catalog()
+                    catalog.name = catalogName
+                    # room
+                    room = model.Room()
+                    room.code = code
+                    room.name = name
+                    room.roomUrl = roomUrl
+                    room.title = title
+                    room.imageUrl = imageUrl
+                    # info
+                    info = model.Info()
+                    info.roomId = room.roomId
+                    info.catalogId = catalog.catalogId
+                    info.number = number
+                    info.time = infoTime
+                    data['list'].append({
+                        'catalog': catalog,
+                        'room': room,
+                        'info': info
+                    })
+            log.spiderLog('爬取结束...', self.className)
+        except Exception as e:
+            log.spiderLog(e, self.className, log.logLevel.error)
         return data
