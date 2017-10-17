@@ -29,8 +29,8 @@ class zhanqi(db.db):
                               data['platform'].code)
                 # catalog信息以前是否存在
                 catalog = self.db.query(model.Catalog).filter(
-                    and_(model.Catalog.name == item['catalog'].name,
-                         model.Catalog.platformId == platform.platformId)
+                    and_(model.Catalog.platformId == platform.platformId,
+                         model.Catalog.name == item['catalog'].name)
                 ).first()
                 if catalog is None:
                     catalog = item['catalog']
@@ -47,8 +47,8 @@ class zhanqi(db.db):
                 self.db.commit()
                 # room信息以前是否存在
                 room = self.db.query(model.Room).filter(
-                    and_(model.Room.code == item['room'].code,
-                         model.Room.platformId == platform.platformId)
+                    and_(model.Room.platformId == platform.platformId,
+                         model.Room.code == item['room'].code)
                 ).first()
                 if room is None:
                     room = item['room']
@@ -70,5 +70,5 @@ class zhanqi(db.db):
                 self.db.commit()
             except Exception as e:
                 self.db.rollback()
-                log.spiderLog(e, data['platform'].code)
+                log.spiderLog(e, data['platform'].code, log.logLevel.error)
         log.spiderLog('结束保存数据...', data['platform'].code)

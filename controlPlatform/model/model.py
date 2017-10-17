@@ -92,7 +92,6 @@ class Room(Base):
                        server_default='0')
     name = Column('name',
                   String(100),
-                  unique=True,
                   nullable=False,
                   default='',
                   server_default='')
@@ -131,6 +130,7 @@ class Platform(Base):
                   server_default='')
     code = Column('code',
                   String(100),
+                  unique=True,
                   nullable=False,
                   default='',
                   server_default='')

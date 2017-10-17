@@ -50,7 +50,7 @@ class platform(singleton.singleton):
                 i_db.save(data)
                 log.platformLog('结束处理{0}爬虫爬取的数据...'.format(spider))
             except Exception as e:
-                log.platformLog(e)
+                log.platformLog(e, log.logLevel.error)
         log.platformLog('platform结束运行...')
 
     def close(self):
