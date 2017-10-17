@@ -50,6 +50,7 @@ class Catalog(Base):
                        autoincrement=True)
     name = Column('name',
                   String(100),
+                  unique=True,
                   nullable=False,
                   default='',
                   server_default='')
@@ -91,6 +92,7 @@ class Room(Base):
                        server_default='0')
     name = Column('name',
                   String(100),
+                  unique=True,
                   nullable=False,
                   default='',
                   server_default='')
@@ -123,6 +125,7 @@ class Platform(Base):
                         autoincrement=True)
     name = Column('name',
                   String(100),
+                  unique=True,
                   nullable=False,
                   default='',
                   server_default='')
@@ -144,6 +147,7 @@ class Sort(Base):
                     autoincrement=True)
     name = Column('name',
                   String(100),
+                  unique=True,
                   nullable=False,
                   default='',
                   server_default='')
