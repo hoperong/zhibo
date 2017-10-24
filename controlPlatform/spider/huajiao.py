@@ -38,14 +38,10 @@ class huajiao(spider.spider):
         data = {'platform': platform, 'list': []}
         try:
             categoryList = self.getCategoryList()
-            log.spiderLog('总共{0}个分类...'.format(
-                len(categoryList)), self.className)
             for i in range(len(categoryList)):
-                log.spiderLog('{0}/{1}个分类...'.format(i + 1,
-                                                     len(categoryList)),
-                              self.className)
                 j = 0
                 infoTime = datetime.now()
+                isOver = False
                 while 1 == 1:
                     response = request.urlopen(
                         '{0}&offset={1}&cateid={2}&nums={3}'.format(
@@ -67,6 +63,10 @@ class huajiao(spider.spider):
                         title = feed['feed']['title']
                         imageUrl = feed['feed']['feedid']
                         number = int(feed['feed']['watches'])
+                        # 不足100的话，接下来的都不要了
+                        if number <= 100:
+                            isOver = True
+                            break
                         # catalog
                         catalog = model.Catalog()
                         catalog.name = catalogName
@@ -89,7 +89,10 @@ class huajiao(spider.spider):
                             'info': info
                         })
                     j += self.pageMount
-            log.spiderLog('爬取结束...', self.className)
+                    if isOver:
+                        break
         except Exception as e:
             log.spiderLog(e, self.className, log.logLevel.error)
+        log.spiderLog('爬取结束,共爬取{0}条数据...'.format(
+            len(data['list'])), self.className)
         return data

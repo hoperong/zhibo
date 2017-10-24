@@ -114,7 +114,7 @@
 						{...}
 					]
 			6）获取各爬虫的爬取处理情况
-			getRunTime(key,type,offset)
+			getInfo(key,type,offset)
 			param:
 				key[string|{all,douyu,huajiao,panda,quanmin,yy,zhanqi}]:种类(all,返回所有)
 				type[string|{d,w,m}]:d-天;w-周;m-月;
@@ -139,7 +139,7 @@
 						},
 						{...}
 					]
-			7）获取各爬虫的爬取处理情况
+			7）获取各爬虫的爬取时间
 			getRunTime(key,type,offset)
 			param:
 				key[string|{all,douyu,huajiao,panda,quanmin,yy,zhanqi}]:种类(all,返回所有)

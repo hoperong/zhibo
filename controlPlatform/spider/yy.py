@@ -34,16 +34,14 @@ class yy(spider.spider):
         data = {'platform': platform, 'list': []}
         try:
             endPage = self.getLastPageIndex()
-            log.spiderLog('总共{0}页...'.format(endPage), self.className)
             for i in range(endPage):
-                log.spiderLog('{0}/{1}页...'.format(i + 1,
-                                                   endPage), self.className)
                 response = request.urlopen(
                     '{0}{1}{2}'.format(self.url, self.params, i + 1))
                 html = response.read().decode('utf-8')
                 yyTv = json.loads(html)
                 items = yyTv['data']['datas']
                 infoTime = datetime.now()
+                isOver = False
                 for item in items:
                     catalogName = item['gameFullName']
                     code = item['uid']
@@ -52,6 +50,10 @@ class yy(spider.spider):
                     title = item['roomName']
                     imageUrl = item['screenshot']
                     number = int(item['totalCount'])
+                    # 不足100的话，接下来的都不要了
+                    if number <= 100:
+                        isOver = True
+                        break
                     # catalog
                     catalog = model.Catalog()
                     catalog.name = catalogName
@@ -73,7 +75,10 @@ class yy(spider.spider):
                         'room': room,
                         'info': info
                     })
-            log.spiderLog('爬取结束...', self.className)
+                if isOver:
+                    break
         except Exception as e:
             log.spiderLog(e, self.className, log.logLevel.error)
+        log.spiderLog('爬取结束,共爬取{0}条数据...'.format(
+            len(data['list'])), self.className)
         return data

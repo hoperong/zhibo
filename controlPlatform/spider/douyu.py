@@ -44,10 +44,7 @@ class douyu(spider.spider):
         try:
             ssl._create_default_https_context = ssl._create_unverified_context
             endPage = self.getLastPageIndex()
-            log.spiderLog('总共{0}页...'.format(endPage), self.className)
             for i in range(endPage):
-                log.spiderLog('{0}/{1}页...'.format(i + 1,
-                                                   endPage), self.className)
                 reUrl = '{0}?page={1}'.format(self.url, i + 1)
                 req = request.Request(reUrl, headers=self.headers)
                 response = request.urlopen(req)
@@ -55,6 +52,7 @@ class douyu(spider.spider):
                 html = BeautifulSoup(page, 'html.parser')
                 lis = html.select('#live-list-contentbox > li')
                 infoTime = datetime.now()
+                isOver = False
                 for li in lis:
                     catalogName = li.select('a > div > div > span')[
                         0].get_text()
@@ -70,6 +68,10 @@ class douyu(spider.spider):
                         number = int((float(newNumber) * 10000))
                     else:
                         number = int(numberStr)
+                    # 不足100的话，接下来的都不要了
+                    if number <= 100:
+                        isOver = True
+                        break
                     # catalog
                     catalog = model.Catalog()
                     catalog.name = catalogName
@@ -91,7 +93,10 @@ class douyu(spider.spider):
                         'room': room,
                         'info': info
                     })
-            log.spiderLog('爬取结束...', self.className)
+                if isOver:
+                    break
         except Exception as e:
             log.spiderLog(e, self.className, log.logLevel.error)
+        log.spiderLog('爬取结束,共爬取{0}条数据...'.format(
+            len(data['list'])), self.className)
         return data

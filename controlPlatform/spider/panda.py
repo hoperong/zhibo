@@ -46,10 +46,7 @@ class panda(spider.spider):
         try:
             ssl._create_default_https_context = ssl._create_unverified_context
             endPage = self.getLastPageIndex()
-            log.spiderLog('总共{0}页...'.format(endPage), self.className)
             for i in range(endPage):
-                log.spiderLog('{0}/{1}页...'.format(i + 1,
-                                                   endPage), self.className)
                 response = request.urlopen(
                     '{0}&pageno={1}&pagenum={2}'.format(self.url,
                                                         i + 1,
@@ -87,7 +84,8 @@ class panda(spider.spider):
                         'room': room,
                         'info': info
                     })
-            log.spiderLog('爬取结束...', self.className)
         except Exception as e:
             log.spiderLog(e, self.className, log.logLevel.error)
+        log.spiderLog('爬取结束,共爬取{0}条数据...'.format(
+            len(data['list'])), self.className)
         return data

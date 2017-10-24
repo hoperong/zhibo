@@ -34,7 +34,6 @@ class zhanqi(spider.spider):
         data = {'platform': platform, 'list': []}
         try:
             mount = self.getMount()
-            log.spiderLog('总共{0}个房间...'.format(mount), self.className)
             response = request.urlopen('{0}{1}/1.json'.format(self.url, mount))
             html = response.read().decode('utf-8')
             zhanqiTV = json.loads(html)
@@ -70,7 +69,8 @@ class zhanqi(spider.spider):
                     'room': room,
                     'info': info
                 })
-            log.spiderLog('爬取结束...', self.className)
         except Exception as e:
             log.spiderLog(e, self.className, log.logLevel.error)
+        log.spiderLog('爬取结束,共爬取{0}条数据...'.format(
+            len(data['list'])), self.className)
         return data
