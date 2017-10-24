@@ -68,6 +68,9 @@ class douyu(spider.spider):
                         number = int((float(newNumber) * 10000))
                     else:
                         number = int(numberStr)
+                    # 斗鱼存在没有显示人数的房间
+                    if number == 0:
+                        continue
                     # 不足100的话，接下来的都不要了
                     if number <= 100:
                         isOver = True

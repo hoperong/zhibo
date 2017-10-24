@@ -67,13 +67,12 @@ class zhanqi(db.db):
                     info.catalogId = catalog.catalogId
                     self.db.add(info)
                     self.db.commit()
-                    log.spiderLog('{0}/{1}完成...'.format(
-                        index + 1, len(data['list'])),
-                        data['platform'].code)
                 except Exception as ee:
                     self.db.rollback()
                     log.spiderLog(
-                        ee, data['platform'].code, log.logLevel.error)
+                        '{0}:{1}'.format(index + 1, ee),
+                        data['platform'].code,
+                        log.logLevel.error)
         except Exception as e:
             log.spiderLog(e, data['platform'].code, log.logLevel.error)
         log.spiderLog('结束保存数据...', data['platform'].code)
