@@ -172,18 +172,15 @@
 			return:
 				type:list
 				format:
-					[
-						{
-							'name'[string]:名称,
-							'list'[list|opt]:下级结构,
-							'open'[json|opt]:
-								{
-								'key'[string|{platform,douyu,huajiao,panda,quanmin,yy,zhanqi}]:查询种类
-								'date'[string|format:yyyy-MM-dd]:日期
-								}
-						},
-						{...}
-					]
+					{
+						'name'[string]:名称,
+						'list'[list|opt]:下级结构,
+						'open'[json|opt]:
+							{
+							'key'[string|{platform,douyu,huajiao,panda,quanmin,yy,zhanqi}]:查询种类
+							'date'[string|format:yyyy-MM-dd]:日期
+							}
+					}
 			9）获取文件内容
 			getContent(key,date)
 			param:

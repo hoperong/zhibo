@@ -8,4 +8,5 @@ from .. import controller
 @controller.route('/')
 @controller.route('/index/')
 def index():
-    return render_template('zhibo/index.html')
+    return render_template('zhibo/wait.html')
+    # return render_template('zhibo/index.html')
